@@ -1,6 +1,6 @@
 
 import "./pages/index.css";
-import initialCards from "./utils/initialCards.js";
+import initialCards from "./utils/initialcards.js";
 import { createCard, deleteCard, likeCard } from "./components/card.js";
 import { openModal, closeModal } from "./components/modal.js";
 import {
