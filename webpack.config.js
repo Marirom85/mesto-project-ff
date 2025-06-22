@@ -24,7 +24,27 @@ module.exports = {
       {
         test: /\.js$/,
         use: "babel-loader",
-        exclude: "/node_modules/",
+        exclude: /node_modules/,
+      },
+      {
+        test: /\.html$/,
+        use: [
+          {
+            loader: "html-loader",
+            options: {
+              sources: {
+                list: [
+                  "...",
+                  {
+                    tag: "img",
+                    attribute: "src",
+                    type: "src",
+                  },
+                ],
+              },
+            },
+          },
+        ],
       },
       {
         test: /\.(png|svg|jpg|gif|woff(2)?|eot|ttf|otf)$/,

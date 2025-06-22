@@ -1,4 +1,5 @@
-
+import "core-js/stable";
+import "regenerator-runtime/runtime";
 import "./pages/index.css";
 import initialCards from "./utils/initialcards.js";
 import { createCard, deleteCard, likeCard } from "./components/card.js";
