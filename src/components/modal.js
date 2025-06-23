@@ -1,16 +1,27 @@
 const handleEscClose = (e) => {
-  if (e.key === "Escape" && document.querySelector(".popup_is-opened")) {
-    console.log("попа");
-    closeModal(e.target);
+  if (e.key === "Escape") {
+    const openPopup = document.querySelector(".popup_is-opened");
+    if (openPopup) {
+      closeModal(openPopup);
+    }
   }
 };
+
+document.addEventListener("keydown", handleEscClose);
 const openModal = (modal) => {
+  if (!modal) return;
   modal.classList.add("popup_is-opened");
+  if (!modal.hasAttribute("tabindex")) {
+    modal.setAttribute("tabindex", "-1");
+  }
   modal.focus();
-  modal.addEventListener("keydown", handleEscClose);
+
 };
+
 const closeModal = (modal) => {
+  if (!modal) return;
   modal.classList.remove("popup_is-opened");
-  modal.removeEventListener("keydown", handleEscClose);
+
 };
+
 export { openModal, closeModal };
