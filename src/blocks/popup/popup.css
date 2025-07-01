@@ -24,3 +24,25 @@
   z-index: 10;
   transition: visibility 0s, opacity 0.6s;
 }
+
+/* Ошибка в поле ввода */
+.popup__input_type_error {
+  border-color: #ff0000; /* ярко-красная рамка */
+  background-color: #FFFFFF; /* фон */
+  
+
+}
+
+/* Скрыть по умолчанию блок с ошибкой */
+.popup__error {
+  color: #ff0000;
+  font-size: 12px;
+  height: 14px; /* чтобы текст не прыгал при появлении */
+  margin-top: 2px;
+  visibility: hidden; /* скрыт по умолчанию */
+}
+
+/* Показывать ошибку */
+.popup__error_visible {
+  visibility: visible;
+}

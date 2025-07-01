@@ -25,3 +25,15 @@
     line-height: 17px;
   }
 }
+.popup__button:not(.popup__button_disabled):hover {
+  background-color: #000000CC
+}
+
+.popup__button_disabled {
+  background-color: transparent;  /* прозрачный фон */
+  color: #a0a0a0;                /* серый цвет текста */
+  border: 1px solid #a0a0a0;      /* серая рамка */
+  cursor: default;
+  pointer-events: none;
+  opacity: 1; 
+}

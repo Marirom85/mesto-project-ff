@@ -5,6 +5,7 @@ const handleFormSubmit = (e) => {
   resetForm(e.target);
   return formObject;
 };
+
 const resetForm = (form) => {
   form.reset();
 };
@@ -14,9 +15,14 @@ const fillFormInputs = (inputsArray, dataArray) => {
     input.value = dataArray[index].textContent;
   });
 };
+
 const modalResetForm = (modal) => {
-  if (modal.querySelector(".popup__form")) {
-    resetForm(modal.querySelector(".popup__form"));
+  const form = modal.querySelector(".popup__form");
+  if (form) {
+
+
+resetForm(form);
   }
 };
+
 export { fillFormInputs, resetForm, modalResetForm, handleFormSubmit };

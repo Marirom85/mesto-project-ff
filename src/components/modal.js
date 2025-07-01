@@ -1,4 +1,3 @@
-
 function handleEscClose(e) {
   if (e.key === "Escape") {
     const openPopup = document.querySelector(".popup_is-opened");
