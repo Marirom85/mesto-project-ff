@@ -1,11 +1,16 @@
 import "./pages/index.css";
 import { openModal, closeModal } from "./components/modal.js";
-import { createCard } from "./components/card.js";
-import {
-  enableValidation,
-  clearValidation,
-  validationSettings,
-} from "./components/validation.js";
+import { createCard, handleDelete, handleLike } from "./components/card.js";
+import { enableValidation, clearValidation } from "./components/validation.js";
+
+const validationSettings = {
+  formSelector: ".popup__form",
+  inputSelector: ".popup__input",
+  submitButtonSelector: ".popup__button",
+  inactiveButtonClass: "popup__button_disabled",
+  inputErrorClass: "popup__input_type_error",
+  errorClass: "popup__error_visible",
+};
 import api from "./components/api.js";
 import {
   renderLoading,
@@ -29,6 +34,13 @@ const formAddCard = document.forms["new-place"];
 const popupImage = document.querySelector(".popup_type_image");
 const popupImageEl = popupImage.querySelector(".popup__image");
 const popupCaption = popupImage.querySelector(".popup__caption");
+
+function handleImageClick({ name, link }) {
+  popupImageEl.src = link;
+  popupImageEl.alt = name;
+  popupCaption.textContent = name;
+  openModal(popupImage);
+}
 
 const cardsContainer = document.querySelector(".places__list");
 
@@ -66,17 +78,9 @@ function handleAddCardSubmit(evt) {
         cardData,
         {
           createCard,
-          onDelete: (cardElement, cardId) => {
-            cardToDelete = { cardElement, cardId };
-            openModal(popupDeleteCard);
-          },
+          onDelete: handleDelete,
           onLike: handleLike,
-          onImageClick: ({ name, link }) => {
-            popupImageEl.src = link;
-            popupImageEl.alt = name;
-            popupCaption.textContent = name;
-            openModal(popupImage);
-          },
+          onImageClick: handleImageClick,
           currentUserId,
         },
         cardsContainer,
@@ -91,19 +95,6 @@ function handleAddCardSubmit(evt) {
 let currentUserId = null;
 let cardToDelete = null;
 
-function handleLike(cardId, likeButton, likeCount, isLiked) {
-  const apiMethod = isLiked ? api.unlikeCard : api.likeCard;
-  apiMethod
-    .call(api, cardId)
-    .then((updatedCard) => {
-      likeButton.classList.toggle(
-        "card__like-button_is-active",
-        updatedCard.likes.some((user) => user._id === currentUserId)
-      );
-      likeCount.textContent = updatedCard.likes.length;
-    })
-    .catch(console.error);
-}
 
 Promise.all([api.getUserInfo(), api.getInitialCards()])
   .then(([userData, cards]) => {
@@ -116,17 +107,9 @@ Promise.all([api.getUserInfo(), api.getInitialCards()])
         cardData,
         {
           createCard,
-          onDelete: (cardElement, cardId) => {
-            cardToDelete = { cardElement, cardId };
-            openModal(popupDeleteCard);
-          },
+          onDelete: handleDelete,
           onLike: handleLike,
-          onImageClick: ({ name, link }) => {
-            popupImageEl.src = link;
-            popupImageEl.alt = name;
-            popupCaption.textContent = name;
-            openModal(popupImage);
-          },
+          onImageClick: handleImageClick,
           currentUserId,
         },
         cardsContainer,
@@ -148,23 +131,6 @@ formAddCard.addEventListener("submit", handleAddCardSubmit);
 
 enableValidation(validationSettings);
 
-const popupDeleteCard = document.querySelector(".popup_type_delete-card");
-const confirmDeleteButton = popupDeleteCard?.querySelector(".popup__button");
-
-if (confirmDeleteButton) {
-  confirmDeleteButton.addEventListener("click", () => {
-    if (cardToDelete) {
-      api
-        .deleteCard(cardToDelete.cardId)
-        .then(() => {
-          cardToDelete.cardElement.remove();
-          closeModal(popupDeleteCard);
-          cardToDelete = null;
-        })
-        .catch(console.error);
-    }
-  });
-}
 
 const avatarPopup = document.querySelector(".popup_type_edit-avatar");
 const avatarForm = document.forms["edit-avatar"];
