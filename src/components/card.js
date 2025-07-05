@@ -1,11 +1,35 @@
+import api from "./api.js";
+
 // Шаблон карточки ищем один раз
 const cardTemplateElement = document
   .querySelector("#card-template")
   .content.querySelector(".card");
 
+function handleLike(cardId, likeButton, likeCount, isLiked, currentUserId) {
+  const apiMethod = isLiked ? api.unlikeCard : api.likeCard;
+  apiMethod
+    .call(api, cardId)
+    .then((updatedCard) => {
+      likeButton.classList.toggle(
+        "card__like-button_is-active",
+        updatedCard.likes.some((user) => user._id === currentUserId)
+      );
+      likeCount.textContent = updatedCard.likes.length;
+    })
+    .catch(console.error);
+}
+
+function handleDelete(cardElement, cardId) {
+  return api.deleteCard(cardId)
+    .then(() => {
+      cardElement.remove();
+    })
+    .catch(console.error);
+}
+
 export function createCard(
   data,
-  { onDelete, onLike, onImageClick, currentUserId }
+  { onImageClick, currentUserId }
 ) {
   const cardElement = cardTemplateElement.cloneNode(true);
   const imageElement = cardElement.querySelector(".card__image");
@@ -32,16 +56,17 @@ export function createCard(
     deleteButton.style.display = "none";
   } else {
     deleteButton.addEventListener("click", () =>
-      onDelete(cardElement, data._id)
+      handleDelete(cardElement, data._id)
     );
   }
 
   likeButton.addEventListener("click", () =>
-    onLike(
+    handleLike(
       data._id,
       likeButton,
       likeCount,
-      likeButton.classList.contains("card__like-button_is-active")
+      likeButton.classList.contains("card__like-button_is-active"),
+      currentUserId
     )
   );
   imageElement.addEventListener("click", () => onImageClick(data));

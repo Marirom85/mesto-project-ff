@@ -1,11 +1,7 @@
 import "./pages/index.css";
 import { openModal, closeModal } from "./components/modal.js";
 import { createCard } from "./components/card.js";
-import {
-  enableValidation,
-  clearValidation,
-  validationSettings,
-} from "./components/validation.js";
+import { enableValidation, clearValidation } from "./components/validation.js";
 import api from "./components/api.js";
 import {
   renderLoading,
@@ -21,6 +17,7 @@ const inputName = formEditProfile.elements["name"];
 const inputJob = formEditProfile.elements["description"];
 const profileName = document.querySelector(".profile__title");
 const profileJob = document.querySelector(".profile__description");
+const profileImage = document.querySelector(".profile__image");
 
 const buttonAddCard = document.querySelector(".profile__add-button");
 const popupAddCard = document.querySelector(".popup_type_new-card");
@@ -37,7 +34,13 @@ document.querySelectorAll(".popup__close").forEach((btn) => {
   btn.addEventListener("click", () => closeModal(popup));
 });
 
-// Универсальный обработчик профиля
+function handleImageClick({ name, link }) {
+  popupImageEl.src = link;
+  popupImageEl.alt = name;
+  popupCaption.textContent = name;
+  openModal(popupImage);
+}
+
 function handleProfileFormSubmit(evt) {
   function makeRequest() {
     return api
@@ -66,17 +69,7 @@ function handleAddCardSubmit(evt) {
         cardData,
         {
           createCard,
-          onDelete: (cardElement, cardId) => {
-            cardToDelete = { cardElement, cardId };
-            openModal(popupDeleteCard);
-          },
-          onLike: handleLike,
-          onImageClick: ({ name, link }) => {
-            popupImageEl.src = link;
-            popupImageEl.alt = name;
-            popupCaption.textContent = name;
-            openModal(popupImage);
-          },
+          onImageClick: handleImageClick,
           currentUserId,
         },
         cardsContainer,
@@ -88,22 +81,16 @@ function handleAddCardSubmit(evt) {
   handleSubmit(makeRequest, evt);
 }
 
-let currentUserId = null;
-let cardToDelete = null;
+const validationSettings = {
+  formSelector: ".popup__form",
+  inputSelector: ".popup__input",
+  submitButtonSelector: ".popup__button",
+  inactiveButtonClass: "popup__button_disabled",
+  inputErrorClass: "popup__input_type_error",
+  errorClass: "popup__error_visible",
+};
 
-function handleLike(cardId, likeButton, likeCount, isLiked) {
-  const apiMethod = isLiked ? api.unlikeCard : api.likeCard;
-  apiMethod
-    .call(api, cardId)
-    .then((updatedCard) => {
-      likeButton.classList.toggle(
-        "card__like-button_is-active",
-        updatedCard.likes.some((user) => user._id === currentUserId)
-      );
-      likeCount.textContent = updatedCard.likes.length;
-    })
-    .catch(console.error);
-}
+let currentUserId = null;
 
 Promise.all([api.getUserInfo(), api.getInitialCards()])
   .then(([userData, cards]) => {
@@ -116,17 +103,7 @@ Promise.all([api.getUserInfo(), api.getInitialCards()])
         cardData,
         {
           createCard,
-          onDelete: (cardElement, cardId) => {
-            cardToDelete = { cardElement, cardId };
-            openModal(popupDeleteCard);
-          },
-          onLike: handleLike,
-          onImageClick: ({ name, link }) => {
-            popupImageEl.src = link;
-            popupImageEl.alt = name;
-            popupCaption.textContent = name;
-            openModal(popupImage);
-          },
+          onImageClick: handleImageClick,
           currentUserId,
         },
         cardsContainer,
@@ -147,43 +124,3 @@ formEditProfile.addEventListener("submit", handleProfileFormSubmit);
 formAddCard.addEventListener("submit", handleAddCardSubmit);
 
 enableValidation(validationSettings);
-
-const popupDeleteCard = document.querySelector(".popup_type_delete-card");
-const confirmDeleteButton = popupDeleteCard?.querySelector(".popup__button");
-
-if (confirmDeleteButton) {
-  confirmDeleteButton.addEventListener("click", () => {
-    if (cardToDelete) {
-      api
-        .deleteCard(cardToDelete.cardId)
-        .then(() => {
-          cardToDelete.cardElement.remove();
-          closeModal(popupDeleteCard);
-          cardToDelete = null;
-        })
-        .catch(console.error);
-    }
-  });
-}
-
-const avatarPopup = document.querySelector(".popup_type_edit-avatar");
-const avatarForm = document.forms["edit-avatar"];
-const avatarInput = avatarForm.elements["avatar"];
-const profileImage = document.querySelector(".profile__image");
-
-profileImage.addEventListener("click", () => {
-  avatarForm.reset();
-  clearValidation(avatarForm, validationSettings);
-  openModal(avatarPopup);
-});
-
-function handleAvatarFormSubmit(evt) {
-  function makeRequest() {
-    return api.updateAvatar({ avatar: avatarInput.value }).then((userData) => {
-      profileImage.style.backgroundImage = `url('${userData.avatar}')`;
-      closeModal(avatarPopup);
-    });
-  }
-  handleSubmit(makeRequest, evt);
-}
-avatarForm.addEventListener("submit", handleAvatarFormSubmit);
