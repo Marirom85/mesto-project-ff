@@ -1,41 +1,58 @@
-// card.js
+// Шаблон карточки ищем один раз
+const cardTemplateElement = document
+  .querySelector("#card-template")
+  .content.querySelector(".card");
 
-const cardTemplate = document.querySelector('#card-template').content;
+export function createCard(
+  data,
+  { onDelete, onLike, onImageClick, currentUserId }
+) {
+  const cardElement = cardTemplateElement.cloneNode(true);
+  const imageElement = cardElement.querySelector(".card__image");
+  const titleElement = cardElement.querySelector(".card__title");
+  const likeButton = cardElement.querySelector(".card__like-button");
+  const likeCount = cardElement.querySelector(".card__like-count");
+  const deleteButton = cardElement.querySelector(".card__delete-button");
 
-function createCard(data, handleDelete, handleLike, handleOpenImage) {
-  const cardElement = cardTemplate.querySelector('.card').cloneNode(true);
+  titleElement.textContent = data.name;
+  imageElement.src = data.link;
+  imageElement.alt = data.name;
 
-  const cardImage = cardElement.querySelector('.card__image');
-  const cardTitle = cardElement.querySelector('.card__title');
-  const likeButton = cardElement.querySelector('.card__like-button');
-  const deleteButton = cardElement.querySelector('.card__delete-button');
+  // Показываем количество лайков
+  likeCount.textContent = data.likes.length;
 
-  cardImage.src = data.link;
-  cardImage.alt = data.name;
-  cardTitle.textContent = data.name;
+  // Отображаем активный лайк, если пользователь уже лайкнул
+  const isLiked = data.likes.some((user) => user._id === currentUserId);
+  if (isLiked) {
+    likeButton.classList.add("card__like-button_is-active");
+  }
 
-  likeButton.addEventListener('click', () => {
-    handleLike(cardElement);
-  });
+  // Показываем корзину только на своих карточках
+  if (!data.owner || data.owner._id !== currentUserId) {
+    deleteButton.style.display = "none";
+  } else {
+    deleteButton.addEventListener("click", () =>
+      onDelete(cardElement, data._id)
+    );
+  }
 
-  deleteButton.addEventListener('click', () => {
-    handleDelete(cardElement);
-  });
-
-  cardImage.addEventListener('click', () => {
-    handleOpenImage(data);
-  });
+  likeButton.addEventListener("click", () =>
+    onLike(
+      data._id,
+      likeButton,
+      likeCount,
+      likeButton.classList.contains("card__like-button_is-active")
+    )
+  );
+  imageElement.addEventListener("click", () => onImageClick(data));
 
   return cardElement;
 }
 
-function deleteCard(cardElement) {
+export function deleteCard(cardElement) {
   cardElement.remove();
 }
 
-function likeCard(cardElement) {
-  const likeButton = cardElement.querySelector('.card__like-button');
-  likeButton.classList.toggle('card__like-button_is-active');
+export function toggleCardLike(likeButton) {
+  likeButton.classList.toggle("card__like-button_is-active");
 }
-
-export { createCard, deleteCard, likeCard };
